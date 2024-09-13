@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Blog - {{ post.title }}</title>
+  </head>
+  <body>
+    <h1>{{ post.title }}</h1>
+    <p>By {{ post.author }} on {{ post.created_at }}</p>
+    <p>{{ post.content }}</p>
+
+    {% if is_owner %}
+    <div style="padding: 12px; border: 1px solid gray">
+      <a href="{% url 'edit_post' post.id %}">Edit</a>
+      <a href="{% url 'delete_post' post.id %}">Delete</a>
+    </div>
+    {% endif %}
+
+    <h2>Comments</h2>
+    <ul>
+      {% for comment in comments %}
+      <li><strong>{{ comment.author }}</strong> ({{ comment.created_at }}): {{ comment.text }}</li>
+      {% empty %}
+      <li>No comments yet.</li>
+      {% endfor %}
+    </ul>
+
+    {% if user.is_authenticated %}
+    <h2>Add a Comment</h2>
+    <form method="post">
+      {% csrf_token %} {{ comment_form.as_p }}
+      <button type="submit">Submit Comment</button>
+    </form>
+    {% else %}
+    <p>You must be <a href="{% url 'login' %}">logged in</a> to add a comment.</p>
+    {% endif %}
+
+    <a href="{% url 'posts_list' %}">Back to all posts</a>
+  </body>
+</html>
