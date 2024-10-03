@@ -1,20 +1,50 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
+	"app/gorm"
+	"fmt"
 	"net/http"
-	"strconv"
+
+	"github.com/gin-gonic/gin"
+
+	_ "app/rest/docs"
+	"github.com/swaggo/gin-swagger" // gin-swagger middleware
+	"github.com/swaggo/files" // swagger embed files
 )
 
 func main() {
+
+	gorm.Connect()
+
 	r := gin.Default()
 
-	// Routes for direct SQL
+	r.Use(ErrorHandlingMiddleware())
+
+
 	r.GET("/users", GetUsers)
-	r.POST("/user", CreateUser)
-	r.PUT("/user/:id", UpdateUser)
-	r.DELETE("/user/:id", DeleteUser)
+	r.POST("/users", CreateUser)
+	r.PUT("/users/:id", UpdateUser)
+	r.DELETE("/users/:id", DeleteUser)
 
 	// Start the server
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	r.Run(":8080")
+	fmt.Println("SERVER STARTED!")
+}
+
+func ErrorHandlingMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Next() // обрабатываем запрос
+
+		// Проверяем наличие ошибок
+		if len(c.Errors) > 0 {
+			var status int
+			if c.Errors.Last().Type == gin.ErrorTypePublic {
+				status = http.StatusBadRequest
+			} else {
+				status = http.StatusInternalServerError
+			}
+			c.JSON(status, gin.H{"errors": c.Errors.Errors()})
+		}
+	}
 }
