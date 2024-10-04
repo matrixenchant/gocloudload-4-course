@@ -1,0 +1,22 @@
+<h1>{{ post.title }}</h1>
+<p>{{ post.content }}</p>
+<p><strong>Автор:</strong> {{ post.author.username }}</p>
+<p><strong>Дата создания:</strong> {{ post.created_date }}</p>
+
+<h2>Последние комментарии</h2>
+
+{% load cache %}
+{% cache 600 'blog_post_'|add:post.id %}  <!-- 10 minutes -->
+
+<ul>
+    {% for comment in post.comments.all %}
+    <li>
+        <strong>{{ comment.author.username }}:</strong>
+        {{ comment.content }} ({{ comment.created_date }})
+    </li>
+    {% empty %}
+    <li>Нет комментариев.</li>
+    {% endfor %}
+</ul>
+
+{% endcache %}

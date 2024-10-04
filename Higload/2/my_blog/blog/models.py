@@ -27,6 +27,8 @@ class Post(models.Model):
     class Meta:
         indexes = [
             models.Index(fields=['author']),
+            models.Index(fields=['created_date']),
+            # models.Index(fields=['tags']),
         ]
 
 class Comment(models.Model):
