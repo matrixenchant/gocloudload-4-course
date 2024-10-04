@@ -96,13 +96,13 @@ func GetUsers(c *gin.Context) {
 func CreateUser(c *gin.Context) {
 	var user gorm.User
 	if err := c.ShouldBindJSON(&user); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.Error(err)
 		return
 	}
 
 	err := gorm.InsertUser(gorm.Conn, user.Name, user.Age)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.Error(err)
 		return
 	}
 
@@ -126,13 +126,13 @@ func UpdateUser(c *gin.Context) {
 
 	var user gorm.User
 	if err := c.ShouldBindJSON(&user); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.Error(err)
 		return
 	}
 
 	err2 := gorm.UpdateUser(gorm.Conn, id, user.Name, user.Age)
 	if err2 != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.Error(err)
 		return
 	}
 
@@ -151,13 +151,13 @@ func DeleteUser(c *gin.Context) {
 	idParam := c.Param("id")
 	id, err := strconv.ParseUint(idParam, 10, 32) // конвертация id в uint64
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		c.Error(err)
 		return
 	}
 
 	err = gorm.DeleteUser(gorm.Conn, id)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.Error(err)
 		return
 	}
 

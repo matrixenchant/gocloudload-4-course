@@ -92,6 +92,22 @@ func GetUsersWithProfiles(db *gorm.DB) ([]User, error) {
 	return users, nil
 }
 
+func UpdateUserWithProfile(db *gorm.DB, userID uint64, updatedUser User) error {
+	if err := db.Model(&User{ID: userID}).Updates(User{
+		Name: updatedUser.Name,
+		Age:  updatedUser.Age,
+		Profile: Profile{
+			Bio:              updatedUser.Profile.Bio,
+			ProfilePictureURL: updatedUser.Profile.ProfilePictureURL,
+		},
+	}).Error; err != nil {
+		return err
+	}
+
+	fmt.Printf("Updated User with ID: %d\n", userID)
+	return nil
+}
+
 func DeleteUserWithProfile(db *gorm.DB, userID uint64) error {
 	if err := db.Delete(&User{}, userID).Error; err != nil {
 		return err

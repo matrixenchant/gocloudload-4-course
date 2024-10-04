@@ -8,7 +8,7 @@ package gorm
 // @Property profile Profile true "User profile"
 type User struct {
 	ID   uint64 `gorm:"primaryKey"`
-	Name string `json:"name"`
+	Name string `gorm:"uniqueIndex" json:"name"`
 	Age  int    `json:"age"`
 
 	Profile Profile `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`

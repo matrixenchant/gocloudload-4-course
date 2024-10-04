@@ -104,9 +104,12 @@ func InsertUsers(db *sql.DB, users []struct {
 	return tx.Commit()
 }
 
-func QueryUsersAdvanced(db *sql.DB, ageFilter int, limit, offset int) error {
+func QueryUsersAdvanced(db *sql.DB, ageFilter int, page, perPage int) error {
 	var rows *sql.Rows
 	var err error
+
+	limit := perPage
+	offset := (page - 1) * perPage
 
 	if ageFilter > 0 {
 		query := `SELECT id, name, age FROM users WHERE age = $1 LIMIT $2 OFFSET $3`
