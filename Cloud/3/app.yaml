@@ -1,0 +1,7 @@
+runtime: python39
+
+entrypoint: gunicorn -b :$PORT main:app
+
+endpoints_api_service:
+  name: cloudapp-assigment-3.appspot.com
+  rollout_strategy: managed

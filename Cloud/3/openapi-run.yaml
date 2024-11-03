@@ -1,0 +1,90 @@
+swagger: '2.0'
+
+info:
+  title: Cat World API
+  version: 1.0.0
+  description: A simple API about cat.
+
+host: cloudapp-assigment-3.appspot.com
+schemes:
+  - 'https'
+
+paths:
+  /cats:
+    get:
+      operationId: getWelcomeMessage
+      summary: Get Welcome Message
+      description: Returns a welcome message.
+      security:
+        - apiKey: []
+      responses:
+        '200':
+          description: A welcome message
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Welcome to the world of cats!
+
+  /cats/facts:
+    get:
+      operationId: getCatFacts
+      summary: Get Cat Facts
+      description: Returns a list of interesting cat facts.
+      security:
+        - apiKey: []
+      responses:
+        '200':
+          description: A list of cat facts
+          schema:
+            type: object
+            properties:
+              facts:
+                type: array
+                items:
+                  type: string
+                example:
+                  - Cats sleep 12-16 hours a day.
+                  - They have excellent night vision.
+                  - Cats can make over 100 different sounds.
+
+  /cats/breeds:
+    get:
+      operationId: getCatBreeds
+      summary: Get Cat Breeds
+      description: Returns a list of popular cat breeds.
+      security:
+        - apiKey: []
+      responses:
+        '200':
+          description: A list of cat breeds
+          schema:
+            type: object
+            properties:
+              breeds:
+                type: array
+                items:
+                  type: string
+                example:
+                  - Persian
+                  - Maine Coon
+                  - Siamese
+                  - Bengal
+
+  /cats/random:
+    get:
+      operationId: getRandomCatFact
+      summary: Get Random Cat Fact
+      description: Returns a random fun fact about cats.
+      security:
+        - apiKey: []
+      responses:
+        '200':
+          description: A random cat fact
+          schema:
+            type: object
+            properties:
+              random_fact:
+                type: string
+                example: A group of cats is called a clowder.
