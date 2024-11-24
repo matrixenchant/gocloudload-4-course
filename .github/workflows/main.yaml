@@ -14,6 +14,6 @@ jobs:
         run: npm i -g snyk-delta
       - uses: snyk/actions/setup@master
       - name: Snyk Test
-        run: snyk test --json --print-deps | snyk-delta
+        run: snyk test --json --print-deps | snyk-delta --baselineOrg=matrixenchant
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
