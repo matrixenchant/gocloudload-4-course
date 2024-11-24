@@ -11,6 +11,7 @@ jobs:
         with:
           node-version: 18.4
       - name: Installing snyk-delta and dependencies
+        working-directory: ./Golang/2
         run: npm i -g snyk-delta
       - uses: snyk/actions/setup@master
       - name: Snyk Test
