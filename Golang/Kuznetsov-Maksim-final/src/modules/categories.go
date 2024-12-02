@@ -34,7 +34,7 @@ func CreateCategory(c *fiber.Ctx) error {
 	}
 
 	if err := utils.ValidateBody(c, &categoryData); err != nil {
-		return err
+		return utils.BadRequest(c, "Validation Error", err.Error())
 	}
 
 	category := models.Category{
@@ -58,7 +58,7 @@ func UpdateCategory(c *fiber.Ctx) error {
 	}
 
 	if err := utils.ValidateBody(c, &categoryData); err != nil {
-		return err
+		return utils.BadRequest(c, "Validation Error", err.Error())
 	}
 
 	var category models.Category

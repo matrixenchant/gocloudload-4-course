@@ -30,6 +30,16 @@ func CreateCartItem(c *fiber.Ctx) error {
 		return utils.BadRequest(c, "Product not found", err.Error())
 	}
 
+	var existingCartItem models.CartItem
+	if err := utils.DB.Where("cart_id = ? AND product_id = ?", cartItemData.CartID, cartItemData.ProductID).First(&existingCartItem).Error; err == nil {
+
+		existingCartItem.Quantity += cartItemData.Quantity
+		if err := utils.DB.Save(&existingCartItem).Error; err != nil {
+			return utils.BadRequest(c, "Error updating cart item quantity", err.Error())
+		}
+		return c.JSON(existingCartItem)
+	}
+
 	cartItem := models.CartItem{
 		CartID:    cartItemData.CartID,
 		ProductID: cartItemData.ProductID,
@@ -68,7 +78,7 @@ func UpdateCartItem(c *fiber.Ctx) error {
 
 	var cartItemData cartItemUpdateDto
 	if err := utils.ValidateBody(c, &cartItemData); err != nil {
-		return err
+		return utils.BadRequest(c, "Validation Error", err.Error())
 	}
 
 	var cartItem models.CartItem

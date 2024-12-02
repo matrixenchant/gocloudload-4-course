@@ -28,7 +28,7 @@ type Product struct {
 	CategoryID uint     `gorm:"not null" json:"category_id"`
 	Category   Category `json:"category"`
 
-	Reviews []Review       `gorm:"foreignKey:UserID"`
+	Reviews []Review       `gorm:"foreignKey:ProductID" json:"reviews"`
 	Images  []ProductImage `gorm:"foreignKey:ProductID" json:"images"`
 }
 
@@ -43,7 +43,6 @@ type Review struct {
 	ReviewID uint `gorm:"primaryKey" json:"review_id"`
 
 	ProductID uint    `gorm:"not null" json:"product_id"`
-	Product   Product `json:"-"`
 
 	UserID uint `gorm:"not null" json:"user_id"`
 	User   User `json:"user"`
@@ -59,10 +58,14 @@ type Order struct {
 	OrderID     uint      `gorm:"primaryKey" json:"order_id"`
 	UserID      uint      `gorm:"not null" json:"user_id"`
 	OrderDate   time.Time `gorm:"autoCreateTime" json:"order_date"`
+
+	// PENDING | CANCELLED | FILLED
 	Status      string    `gorm:"not null" json:"status"`
 	TotalAmount float64   `gorm:"not null" json:"total_amount"`
 
 	CartID uint `gorm:"not null" json:"cart_id"`
+
+	Payment Payment `gorm:"foreignKey:OrderID" json:"payment"`
 }
 
 // type OrderItem struct {

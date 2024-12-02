@@ -22,6 +22,7 @@ func SetupRoutes(app *fiber.App) {
 	// User routes
 	userRoutes := app.Group("/users", middleware.AuthMiddleware)
 	{
+		userRoutes.Get("/profile", modules.GetMyProfile)
 		userRoutes.Post("/addresses", modules.CreateAddress)
 		userRoutes.Get("/addresses", modules.GetAllAddresses)
 		userRoutes.Patch("/addresses/:id", modules.PatchAddress)
@@ -60,7 +61,7 @@ func SetupRoutes(app *fiber.App) {
 	app.Patch("/reviews/:id", middleware.AuthMiddleware, modules.UpdateReview)
 	app.Delete("/reviews/:id", middleware.AuthMiddleware, modules.DeleteReview)
 
-	// CartItem routes
+	// Carts routes
 	app.Get("/carts", middleware.AuthMiddleware, modules.GetAllShoppingCarts)
 	app.Get("/carts/:id", middleware.AuthMiddleware, modules.GetShoppingCart)
 	app.Post("/carts", middleware.AuthMiddleware, modules.CreateShoppingCart)
@@ -74,11 +75,14 @@ func SetupRoutes(app *fiber.App) {
 
 	// Orders routes
 	app.Get("/orders", middleware.AuthMiddleware, modules.GetMyAllOrders)
+	app.Get("/orders/:id", middleware.AuthMiddleware, modules.GetOrder)
 	app.Post("/orders", middleware.AuthMiddleware, modules.CreateOrder)
 	app.Get("/orders/:id/cancel", middleware.AuthMiddleware, modules.CancelOrder)
+	app.Get("/orders/:id/pay", middleware.AuthMiddleware, modules.PayOrder)
 
-	app.Post("/cart-item", middleware.AuthMiddleware, modules.CreateCartItem)
-	app.Patch("/cart-item/:id", middleware.AuthMiddleware, modules.UpdateCartItem)
+	// Payments routes
+	app.Get("/payments", middleware.AuthMiddleware, middleware.AdminMiddleware, modules.GetAllPayments)
+	app.Get("/payments/me", middleware.AuthMiddleware, middleware.AdminMiddleware, modules.GetAllPayments)
 
 	app.All("*", func(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusNotFound).SendString("404 Not Found")

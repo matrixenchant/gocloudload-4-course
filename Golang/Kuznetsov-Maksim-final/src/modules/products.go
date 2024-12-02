@@ -62,7 +62,7 @@ func GetProduct(c *fiber.Ctx) error {
 
 func GetAllProducts(c *fiber.Ctx) error {
 	var products []models.Product
-	if err := utils.DB.Preload("Category").Find(&products).Error; err != nil {
+	if err := utils.DB.Preload("Category").Preload("Reviews").Find(&products).Error; err != nil {
 		return utils.BadRequest(c, "Error retrieving products", err.Error())
 	}
 
@@ -74,7 +74,7 @@ func UpdateProduct(c *fiber.Ctx) error {
 
 	var productData productUpdateDto
 	if err := utils.ValidateBody(c, &productData); err != nil {
-		return err
+		return utils.BadRequest(c, "Validation Error", err.Error())
 	}
 
 	var product models.Product

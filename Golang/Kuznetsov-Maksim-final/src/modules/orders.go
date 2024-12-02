@@ -44,7 +44,7 @@ func CreateOrder(c *fiber.Ctx) error {
 	order := models.Order{
 		UserID:      cart.UserID,
 		OrderDate:   time.Now(),
-		Status:      "Pending",
+		Status:      "PENDING",
 		TotalAmount: totalAmount,
 		CartID:      cart.CartID,
 	}
@@ -57,10 +57,14 @@ func CreateOrder(c *fiber.Ctx) error {
 }
 
 func GetOrder(c *fiber.Ctx) error {
+	userContext, err := utils.GetAuthUser(c)
+	if err != nil {
+		return utils.Unauthorized(c, "Unauthorized", err.Error())
+	}
 	orderID := c.Params("id")
 
 	var order models.Order
-	if err := utils.DB.First(&order, orderID).Error; err != nil {
+	if err := utils.DB.Where("user_id = ?", userContext.UserID).Where("order_id = ?", orderID).First(&order, orderID).Error; err != nil {
 		return utils.NotFound(c, "Order not found", err.Error())
 	}
 
@@ -74,7 +78,7 @@ func GetMyAllOrders(c *fiber.Ctx) error {
 	}
 
 	var orders []models.Order
-	if err := utils.DB.Where("user_id = ?", userContext.UserID).Find(&orders).Error; err != nil {
+	if err := utils.DB.Preload("Payment").Where("user_id = ?", userContext.UserID).Find(&orders).Error; err != nil {
 		return utils.BadRequest(c, "Error retrieving orders", err.Error())
 	}
 
@@ -110,11 +114,6 @@ func CancelOrder(c *fiber.Ctx) error {
 	}
 	orderID := c.Params("id")
 
-	var orderData orderUpdateDto
-	if err := utils.ValidateBody(c, &orderData); err != nil {
-		return utils.BadRequest(c, "Validation Error", err.Error())
-	}
-
 	var order models.Order
 	if err := utils.DB.First(&order, orderID).Error; err != nil {
 		return utils.NotFound(c, "Order not found", err.Error())
@@ -122,6 +121,10 @@ func CancelOrder(c *fiber.Ctx) error {
 
 	if order.UserID != userContext.UserID {
 		return utils.Forbidden(c, "Forbidden", "You are not authorized to see this shopping cart")
+	}
+
+	if order.Status == "CANCELLED" {
+		return utils.BadRequest(c, "Order already cancelled", "")
 	}
 
 	order.Status = "CANCELLED"
@@ -133,7 +136,11 @@ func CancelOrder(c *fiber.Ctx) error {
 	return c.JSON(order)
 }
 
-func DeleteOrder(c *fiber.Ctx) error {
+func PayOrder(c *fiber.Ctx) error {
+	userContext, err := utils.GetAuthUser(c)
+	if err != nil {
+		return utils.Unauthorized(c, "Unauthorized", err.Error())
+	}
 	orderID := c.Params("id")
 
 	var order models.Order
@@ -141,9 +148,29 @@ func DeleteOrder(c *fiber.Ctx) error {
 		return utils.NotFound(c, "Order not found", err.Error())
 	}
 
-	if err := utils.DB.Delete(&order).Error; err != nil {
-		return utils.BadRequest(c, "Error deleting order", err.Error())
+	if order.UserID != userContext.UserID {
+		return utils.Forbidden(c, "Forbidden", "You are not authorized to see this shopping cart")
 	}
 
-	return c.JSON(fiber.Map{"message": "Order deleted successfully"})
+	if order.Status == "FILLED" {
+		return utils.BadRequest(c, "Order already payed", "")
+	}
+
+	order.Status = "FILLED"
+
+	if err := utils.DB.Save(&order).Error; err != nil {
+		return utils.BadRequest(c, "Error updating order", err.Error())
+	}
+
+	payment := models.Payment{
+		OrderID:       order.OrderID,
+		Amount:        order.TotalAmount,
+		PaymentMethod: "CREDIT_CARD",
+	}
+
+	if err := utils.DB.Create(&payment).Error; err != nil {
+		return utils.BadRequest(c, "Error creating payment", err.Error())
+	}
+
+	return c.JSON(payment)
 }

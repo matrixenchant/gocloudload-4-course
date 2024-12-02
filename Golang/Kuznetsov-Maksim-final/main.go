@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/joho/godotenv"
 )
 
@@ -21,7 +22,15 @@ func main() {
 	defer utils.CloseDB()
 
 	app := fiber.New()
+
+	app.Use(cors.New(cors.Config{
+		AllowHeaders:     "*",
+		AllowOrigins:     "*",
+		AllowMethods:     "GET,POST,HEAD,PUT,DELETE,PATCH,OPTIONS",
+	}))
+
 	src.SetupRoutes(app)
+
 
 	port := os.Getenv("PORT")
 	if port == "" {

@@ -14,6 +14,22 @@ type userAddressDto struct {
 	ZipCode string `json:"zip_code" validate:"required,len=6"`
 }
 
+func GetMyProfile(c *fiber.Ctx) error {
+	userContext, err := utils.GetAuthUser(c)
+	if err != nil {
+		return utils.Unauthorized(c, "Unauthorized", err.Error())
+	}
+
+	var user models.User
+	if err := utils.DB.First(&user, userContext.UserID).Find(&user).Error; err != nil {
+		return utils.BadRequest(c, "Error retrieving addresses", err.Error())
+	}
+
+	user.PasswordHash = ""
+
+	return c.JSON(user)
+}
+
 func CreateAddress(c *fiber.Ctx) error {
 	userContext, err := utils.GetAuthUser(c)
 	if err != nil {
@@ -70,7 +86,7 @@ func PatchAddress(c *fiber.Ctx) error {
 
 	var addressData userAddressPatchDto
 	if err := utils.ValidateBody(c, &addressData); err != nil {
-		return err
+		return utils.BadRequest(c, "Validation Error", err.Error())
 	}
 
 	var address models.UserAddress

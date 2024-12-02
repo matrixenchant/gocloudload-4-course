@@ -35,8 +35,8 @@ func GetAllShoppingCarts(c *fiber.Ctx) error {
 	}
 
 	var shoppingCarts []models.ShoppingCart
-	if err := utils.DB.Where("user_id = ?", userContext.UserID).Find(&shoppingCarts).Error; err != nil {
-		return utils.NotFound(c, "Error fetchin shopping carts", err.Error())
+	if err := utils.DB.Preload("Items.Product").Where("user_id = ?", userContext.UserID).Find(&shoppingCarts).Error; err != nil {
+		return utils.NotFound(c, "Error fetching shopping carts", err.Error())
 	}
 
 	return c.JSON(shoppingCarts)
