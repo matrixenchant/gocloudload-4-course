@@ -1,0 +1,38 @@
+{
+  "compilerOptions": {
+    "composite": true,
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+    "target": "ESNext",
+    "useDefineForClassFields": true,
+    "lib": ["ES2021", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+
+    /* Bundler mode */
+    "moduleResolution": "Bundler",
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+    "jsx": "react-jsx",
+
+    /* Linting */
+    "strict": true, // Включает все строгие проверки TypeScript
+    "noImplicitAny": true, // Запрещает неявный тип `any`, если не указан явно
+    "strictNullChecks": true, // Запрещает использование `null` и `undefined` без явной проверки
+    "strictFunctionTypes": true, // Ужесточает проверку совместимости типов для функций
+    "strictBindCallApply": true, // Проверяет правильность использования методов bind, call, apply
+    "strictPropertyInitialization": true, // Требует инициализации всех свойств в конструкторах классов
+    "noImplicitThis": true, // Запрещает неявное использование `this` без явного контекста
+    "alwaysStrict": true, // Автоматически включает строгий режим JavaScript (`"use strict"`)
+    "noUnusedLocals": false, // Выдает ошибку, если есть неиспользуемые переменные
+    "noUnusedParameters": false, // Выдает ошибку, если есть неиспользуемые параметры в функциях
+    "noImplicitReturns": false,
+
+    "paths": {
+      "@/*": ["./src/*"],
+    },
+  },
+  "include": ["src", "vite.config.ts"]
+}
