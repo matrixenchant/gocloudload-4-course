@@ -36,6 +36,12 @@ func CreateOrder(c *fiber.Ctx) error {
 		return utils.BadRequest(c, "Cart is empty", "")
 	}
 
+	cart.IsShown = false
+
+	if err := utils.DB.Save(&cart).Error; err != nil {
+		return utils.BadRequest(c, "Error updating cart", err.Error())
+	}
+
 	var totalAmount float64
 	for _, item := range cart.Items {
 		totalAmount += item.Product.Price * float64(item.Quantity)

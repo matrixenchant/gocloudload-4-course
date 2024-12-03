@@ -6,25 +6,27 @@ import { formatPrice } from '@/utils/format.utils';
 import { MinusIcon, PlusIcon, ShoppingCartIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { Avatar, Badge, Button, Col, Flex, List, Modal, Tabs } from 'antd';
 import { observer } from 'mobx-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 
 const CartModalButton = () => {
   const [cartVisible, setCartVisible] = useState(false);
 
+  const cartsList = CartsStore.myCarts.data;
+
   const activeCartId = CartsStore.activeCartId;
-  const activeCart = CartsStore.myCarts.data.find((cart) => cart.cart_id === activeCartId);
+  const activeCart = cartsList.find((cart) => cart.cart_id === activeCartId);
 
   useEffect(() => {
     if (cartVisible) CartsStore.myCarts.call();
   }, [cartVisible]);
 
   useEffect(() => {
-    if (CartsStore.myCarts.data.length > 0) {
-      CartsStore.setActiveCartId(CartsStore.myCarts.data[0].cart_id);
+    if (cartsList.length > 0) {
+      CartsStore.setActiveCartId(cartsList[0].cart_id);
     }
-  }, [CartsStore.myCarts.data]);
+  }, [cartsList]);
 
   const handleNewCart = async () => {
     try {
@@ -90,7 +92,7 @@ const CartModalButton = () => {
           onChange={onChange}
           activeKey={activeCartId?.toString() || undefined}
           onEdit={onEdit}
-          items={CartsStore.myCarts.data.map((cart) => ({
+          items={cartsList.map((cart) => ({
             label: `Cart #${cart.cart_id}`,
             key: String(cart.cart_id),
             children: <CartItems cart={cart} />,
@@ -133,6 +135,7 @@ const CartItems = ({ cart }: { cart: ShoppingCart }) => {
     try {
       await CartsStore.checkoutCart.call({ cart_id: cart.cart_id });
       await UserStore.orders.call();
+      await CartsStore.myCarts.call();
       navigate('/orders');
     } catch (e) {
       toast.error(getApiErrorMessage(e));

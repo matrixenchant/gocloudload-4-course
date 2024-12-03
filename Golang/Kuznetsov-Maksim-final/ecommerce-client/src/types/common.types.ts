@@ -56,7 +56,8 @@ export interface ShoppingCart {
   created_at: string;
   user_id: number;
   items: CartItem[] | null;
-  order: Order | null;
+  is_shown: boolean;
+  // order: Order | null;
 }
 
 export interface CartItem {

@@ -3,11 +3,12 @@ import { Order } from '@/types/common.types';
 import { getApiErrorMessage } from '@/utils/api.utils';
 import { formatPrice } from '@/utils/format.utils';
 import { Button, Card, Col, Divider, Flex, Row, Space, Tag, Typography } from 'antd';
+import { CSSProperties } from 'react';
 import toast from 'react-hot-toast';
 
 const { Text } = Typography;
 
-const OrderCard = ({ order }: { order: Order }) => {
+const OrderCard = ({ order, style }: { order: Order; style?: CSSProperties }) => {
   const onCancelOrder = async () => {
     try {
       await UserStore.cancelOrder.call(order.order_id);
@@ -27,7 +28,7 @@ const OrderCard = ({ order }: { order: Order }) => {
   };
 
   return (
-    <Card title={`Order #${order.order_id}`} style={{ width: 300 }}>
+    <Card title={`Order #${order.order_id}`} style={{ width: 300, ...style }}>
       <Row gutter={[16, 8]}>
         <Col span={24}>
           <Text strong>Date:</Text> {new Date(order.order_date).toLocaleDateString()}
@@ -57,7 +58,7 @@ const OrderCard = ({ order }: { order: Order }) => {
             Cancel
           </Button>
         )}
-        {order.status === 'PENDING' && <Button>Pay</Button>}
+        {order.status === 'PENDING' && <Button onClick={onPayOrder}>Pay</Button>}
       </Flex>
     </Card>
   );

@@ -62,7 +62,7 @@ func GetProduct(c *fiber.Ctx) error {
 
 func GetAllProducts(c *fiber.Ctx) error {
 	var products []models.Product
-	if err := utils.DB.Preload("Category").Preload("Reviews").Find(&products).Error; err != nil {
+	if err := utils.DB.Preload("Category").Preload("Reviews").Preload("Images").Find(&products).Error; err != nil {
 		return utils.BadRequest(c, "Error retrieving products", err.Error())
 	}
 

@@ -1,4 +1,5 @@
 import AuthStore from '@/stores/auth.store';
+import UserStore from '@/stores/user.store';
 import { UserOutlined } from '@ant-design/icons';
 import { Button, Dropdown, Flex, Menu } from 'antd';
 import { Header } from 'antd/es/layout/layout';
@@ -27,6 +28,7 @@ const profileMenu = {
 
 const ShopHeader = () => {
   const navigate = useNavigate();
+  const user = UserStore.user;
 
   return (
     <Header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -41,10 +43,9 @@ const ShopHeader = () => {
       <Flex>
         <CartModalButton />
         <Dropdown menu={profileMenu} trigger={['click']}>
-          <Button
-            type="text"
-            icon={<UserOutlined style={{ fontSize: '18px', color: 'white' }} />}
-          />
+          <Button type="text" icon={<UserOutlined style={{ fontSize: '18px', color: 'white' }} />}>
+            <span style={{ color: 'white' }}>{user?.username}</span>
+          </Button>
         </Dropdown>
       </Flex>
     </Header>

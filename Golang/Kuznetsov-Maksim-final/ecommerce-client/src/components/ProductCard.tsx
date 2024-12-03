@@ -4,17 +4,19 @@ import { Product } from '@/types/common.types';
 import { getApiErrorMessage } from '@/utils/api.utils';
 import { PhotoIcon, StarIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { Button, Card, Flex, Image, List, Typography } from 'antd';
+import { CSSProperties } from 'react';
 import toast from 'react-hot-toast';
 import ReviewModal from './ReviewModal';
 
 const { Title, Text } = Typography;
 
-const ProductCard = ({ product }: { product: Product }) => {
+const ProductCard = ({ product, style }: { product: Product; style?: CSSProperties }) => {
   const user = UserStore.user;
 
   const onAddCartItem = async () => {
     try {
       await CartsStore.addCartItem(product.product_id, 1);
+      await CartsStore.myCarts.call();
 
       toast.success('Product added to cart');
     } catch (e: any) {
@@ -27,12 +29,14 @@ const ProductCard = ({ product }: { product: Product }) => {
       title={product.name}
       cover={
         product.images ? (
-          <Image
-            src={product.images[2]?.image_url || 'https://via.placeholder.com/300'}
-            alt={product.name}
-            height={200}
-            style={{ objectFit: 'cover' }}
-          />
+          <Image.PreviewGroup items={product.images.map((x) => x.image_url)}>
+            <Image
+              height={300}
+              style={{ objectFit: 'contain' }}
+              alt={product.name}
+              src={product.images[0]?.image_url}
+            />
+          </Image.PreviewGroup>
         ) : (
           <div
             style={{
@@ -46,7 +50,7 @@ const ProductCard = ({ product }: { product: Product }) => {
           </div>
         )
       }
-      style={{ width: 300 }}
+      style={{ width: 300, ...style }}
     >
       <Button onClick={onAddCartItem}>Add to cart</Button>
       <Title level={5}>Price: ${product.price.toFixed(2)}</Title>

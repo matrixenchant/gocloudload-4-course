@@ -25,13 +25,13 @@ const Orders = () => {
           sm: 2,
           md: 4,
           lg: 4,
-          xl: 6,
+          xl: 4,
           xxl: 3,
         }}
         dataSource={orders}
         renderItem={(item) => (
           <List.Item>
-            <OrderCard order={item} />
+            <OrderCard style={{ width: '100%' }} order={item} />
           </List.Item>
         )}
       />

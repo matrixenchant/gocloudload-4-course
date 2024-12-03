@@ -80,6 +80,7 @@ type ShoppingCart struct {
 	CartID    uint       `gorm:"primaryKey" json:"cart_id"`
 	CreatedAt time.Time  `gorm:"autoCreateTime" json:"created_at"`
 	UserID    uint       `gorm:"not null" json:"user_id"`
+	IsShown   bool       `gorm:"default:true" json:"is_shown"`
 	Items     []CartItem `gorm:"foreignKey:CartID" json:"items"`
 	Order     Order      `gorm:"foreignKey:CartID" json:"-"`
 }

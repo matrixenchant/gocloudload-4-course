@@ -26,13 +26,13 @@ const HomePage = () => {
           sm: 2,
           md: 4,
           lg: 4,
-          xl: 6,
+          xl: 4,
           xxl: 3,
         }}
         dataSource={products}
         renderItem={(item: Product) => (
           <List.Item>
-            <ProductCard product={item} />
+            <ProductCard style={{ width: '100%' }} product={item} />
           </List.Item>
         )}
       />
