@@ -8,6 +8,7 @@ export class ProductsStoreClass {
   }
 
   products = new RequestData<[], Product[]>(() => api('products'), []);
+  categories = new RequestData<[], Product[]>(() => api('categories'), []);
 }
 
 const ProductsStore = new ProductsStoreClass();

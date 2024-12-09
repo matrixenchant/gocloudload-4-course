@@ -1,8 +1,12 @@
 package modules
 
 import (
+	"context"
 	"e-commerce/src/models"
 	"e-commerce/src/utils"
+	"encoding/json"
+	"fmt"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -61,12 +65,41 @@ func GetProduct(c *fiber.Ctx) error {
 }
 
 func GetAllProducts(c *fiber.Ctx) error {
-	var products []models.Product
-	if err := utils.DB.Preload("Category").Preload("Reviews").Preload("Images").Find(&products).Error; err != nil {
-		return utils.BadRequest(c, "Error retrieving products", err.Error())
+	ctx := context.Background()
+	cacheKey := "all_products"
+	ch := make(chan []models.Product)
+	errCh := make(chan error)
+
+	// Check Cache
+	cachedData, err := utils.GetCachedData(ctx, cacheKey)
+	if err == nil {
+		var products []models.Product
+		if jsonErr := json.Unmarshal([]byte(cachedData), &products); jsonErr == nil {
+			return c.JSON(products)
+		}
 	}
 
-	return c.JSON(products)
+	go func() {
+		var products []models.Product
+		err := utils.DB.Preload("Category").Preload("Reviews").Preload("Images").Find(&products).Error
+		if err != nil {
+			errCh <- err
+			return
+		}
+
+		productsJSON, _ := json.Marshal(products)
+		_ = utils.SetCacheData(ctx, cacheKey, string(productsJSON), 2*time.Minute)
+		ch <- products
+	}()
+
+	select {
+	case products := <-ch:
+		return c.JSON(products)
+	case err := <-errCh:
+		return utils.BadRequest(c, "Error retrieving products", err.Error())
+	case <-time.After(5 * time.Second):
+		return utils.BadRequest(c, "Timeout", "Fetching products took too long")
+	}
 }
 
 func UpdateProduct(c *fiber.Ctx) error {
@@ -105,6 +138,10 @@ func UpdateProduct(c *fiber.Ctx) error {
 
 	if err := utils.DB.Save(&product).Error; err != nil {
 		return utils.BadRequest(c, "Error updating product", err.Error())
+	}
+
+	if err := utils.DeleteCachedData(context.Background(), "all_products"); err != nil {
+		fmt.Println("Error clear cache: " + err.Error())
 	}
 
 	return c.JSON(product)

@@ -1,0 +1,141 @@
+# gcloud endpoints services deploy openapi-appengine.yaml
+
+swagger: '2.0'
+info:
+  description: 'Cloud-Powered Event Management System'
+  title: 'API'
+  version: '1.0.0'
+host: 'app-cloud-final.appspot.com'
+consumes:
+  - 'application/json'
+produces:
+  - 'application/json'
+schemes:
+  - 'https'
+paths:
+  '/api/auth/login':
+    post:
+      description: 'Authenticate a user by email and password and return a JWT token.'
+      operationId: 'authenticateUser'
+      produces:
+        - 'application/json'
+      parameters:
+        - in: body
+          name: loginData
+          description: 'User login credentials.'
+          required: true
+          schema:
+            $ref: '#/definitions/LoginData'
+      responses:
+        200:
+          description: 'Authentication successful. Returns a JWT token.'
+          schema:
+            $ref: '#/definitions/AuthSuccessResponse'
+        400:
+          description: 'Authentication failed due to invalid credentials or user not found.'
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+  '/api/auth/register':
+    post:
+      description: 'Register a new user with username, email, and password.'
+      operationId: 'registerUser'
+      produces:
+        - 'application/json'
+      parameters:
+        - in: body
+          name: registrationData
+          description: 'New user registration details.'
+          required: true
+          schema:
+            $ref: '#/definitions/RegistrationData'
+      responses:
+        201:
+          description: 'User registered successfully. Returns user details.'
+          schema:
+            $ref: '#/definitions/RegistrationSuccessResponse'
+        400:
+          description: 'Registration failed due to missing or invalid fields, or username/email already in use.'
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        500:
+          description: 'Server error occurred during user registration.'
+          schema:
+            $ref: '#/definitions/ServerErrorResponse'
+definitions:
+  LoginData:
+    type: object
+    properties:
+      email:
+        type: string
+        format: email
+        description: "User's email address."
+      password:
+        type: string
+        format: password
+        description: "User's password."
+    required:
+      - email
+      - password
+  AuthSuccessResponse:
+    type: object
+    properties:
+      token:
+        type: string
+        description: 'JWT token for authenticated user.'
+  RegistrationData:
+    type: object
+    properties:
+      username:
+        type: string
+        description: 'Desired username for the new user.'
+      email:
+        type: string
+        format: email
+        description: 'Email address of the new user.'
+      password:
+        type: string
+        format: password
+        description: 'Password for the new user.'
+      first_name:
+        type: string
+        description: 'First name of the new user.'
+      last_name:
+        type: string
+        description: 'Last name of the new user.'
+    required:
+      - username
+      - email
+      - password
+  RegistrationSuccessResponse:
+    type: object
+    properties:
+      message:
+        type: string
+        description: 'Success message.'
+      user:
+        type: object
+        properties:
+          id:
+            type: integer
+            description: 'ID of the newly created user.'
+          username:
+            type: string
+            description: 'Username of the newly created user.'
+          email:
+            type: string
+            description: 'Email address of the newly created user.'
+  ErrorResponse:
+    type: object
+    properties:
+      message:
+        type: string
+        description: 'Error message indicating the reason for failure.'
+  ServerErrorResponse:
+    type: object
+    properties:
+      message:
+        type: string
+        description: 'Error message indicating a server error.'
+      error:
+        type: string
+        description: 'Detailed server error information.'
