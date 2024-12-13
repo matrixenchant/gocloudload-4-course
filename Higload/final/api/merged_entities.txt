@@ -1,0 +1,614 @@
+import { CrudValidationGroups } from '@dataui/crud';
+import { IsNotEmpty, IsNumber, IsPositive } from 'class-validator';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+import { Product } from '../products/product.entity';
+import { ShoppingCart } from '../shopping-carts/shopping-cart.entity';
+
+const { CREATE, UPDATE } = CrudValidationGroups;
+
+@Entity()
+export class CartItem {
+  @PrimaryGeneratedColumn() id: number;
+
+  @IsNotEmpty({ groups: [CREATE] })
+  @IsNumber({}, { always: true })
+  @ManyToOne(() => ShoppingCart, (cart) => cart.items)
+  cart: ShoppingCart;
+
+  @IsNotEmpty({ groups: [CREATE] })
+  @IsNumber({}, { always: true })
+  @ManyToOne(() => Product, (product) => product.cart_items)
+  product: Product;
+
+  @IsNotEmpty({ groups: [CREATE] })
+  @IsNumber({}, { always: true })
+  @IsPositive({ always: true })
+  @Column({ type: 'int', nullable: false })
+  quantity: number;
+
+  @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  created_at: Date;
+
+  @UpdateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+    onUpdate: 'CURRENT_TIMESTAMP',
+  })
+  updated_at: Date;
+}
+
+import { CrudValidationGroups } from '@dataui/crud';
+import {
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  MaxLength,
+} from 'class-validator';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+import { Product } from '../products/product.entity';
+
+const { CREATE, UPDATE } = CrudValidationGroups;
+
+@Entity()
+export class Category {
+  @PrimaryGeneratedColumn() id: number;
+
+  @IsNotEmpty({ groups: [CREATE] })
+  @IsString({ always: true })
+  @MaxLength(100, { always: true })
+  @Column({ type: 'varchar', length: 100, nullable: false })
+  name: string;
+
+  @IsOptional({ groups: [UPDATE] })
+  @IsNumber({}, { always: true })
+  @Column({ type: 'int', nullable: true })
+  parent_id: number;
+
+  @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  created_at: Date;
+
+  @UpdateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+    onUpdate: 'CURRENT_TIMESTAMP',
+  })
+  updated_at: Date;
+
+  /**
+   * Relations
+   */
+  @OneToMany(() => Product, (product) => product.category)
+  products: Product[];
+}
+
+import { CrudValidationGroups } from '@dataui/crud';
+import { IsNotEmpty, IsNumber, IsPositive } from 'class-validator';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+import { Order } from '../orders/order.entity';
+import { Product } from '../products/product.entity';
+
+const { CREATE, UPDATE } = CrudValidationGroups;
+
+@Entity()
+export class OrderItem {
+  @PrimaryGeneratedColumn() id: number;
+
+  @IsNotEmpty({ groups: [CREATE] })
+  @IsNumber({}, { always: true })
+  @ManyToOne(() => Order, (order) => order.order_items)
+  order: Order;
+
+  @IsNotEmpty({ groups: [CREATE] })
+  @IsNumber({}, { always: true })
+  @ManyToOne(() => Product, (product) => product.order_items)
+  product: Product;
+
+  @IsNotEmpty({ groups: [CREATE] })
+  @IsNumber({}, { always: true })
+  @IsPositive({ always: true })
+  @Column({ type: 'int', nullable: false })
+  quantity: number;
+
+  @IsNotEmpty({ groups: [CREATE] })
+  @IsNumber({}, { always: true })
+  @IsPositive({ always: true })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: false })
+  price: number;
+
+  @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  created_at: Date;
+
+  @UpdateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+    onUpdate: 'CURRENT_TIMESTAMP',
+  })
+  updated_at: Date;
+}
+
+import { CrudValidationGroups } from '@dataui/crud';
+import { IsEnum, IsNotEmpty, IsNumber } from 'class-validator';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+import { OrderItem } from '../order-items/orderItem.entity';
+import { Payment } from '../payments/payment.entity';
+import { User } from '../users/user.entity';
+
+const { CREATE, UPDATE } = CrudValidationGroups;
+
+export enum OrderStatus {
+  PENDING = 'pending',
+  COMPLETED = 'completed',
+  CANCELLED = 'cancelled',
+}
+
+@Entity()
+export class Order {
+  @PrimaryGeneratedColumn() id: number;
+
+  @IsNotEmpty({ groups: [CREATE] })
+  @IsNumber({}, { always: true })
+  @ManyToOne(() => User, (user) => user.orders)
+  user: User;
+
+  @IsNotEmpty({ groups: [CREATE] })
+  @IsEnum(OrderStatus, { groups: [CREATE, UPDATE] })
+  @Column({ type: 'varchar', length: 20, nullable: false })
+  order_status: OrderStatus;
+
+  @IsNotEmpty({ groups: [CREATE] })
+  @IsNumber({}, { always: true })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: false })
+  total_amount: number;
+
+  @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  created_at: Date;
+
+  @UpdateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+    onUpdate: 'CURRENT_TIMESTAMP',
+  })
+  updated_at: Date;
+
+  /**
+   * Relations
+   */
+  @OneToMany(() => OrderItem, (e) => e.order)
+  order_items: OrderItem[];
+
+  @OneToMany(() => Payment, (e) => e.order)
+  payments: Payment[];
+}
+
+import { CrudValidationGroups } from '@dataui/crud';
+import {
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsPositive,
+  IsString,
+} from 'class-validator';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+import { Order } from '../orders/order.entity';
+
+const { CREATE, UPDATE } = CrudValidationGroups;
+
+export enum PaymentStatus {
+  PENDING = 'pending',
+  COMPLETED = 'completed',
+  FAILED = 'failed',
+}
+
+@Entity()
+export class Payment {
+  @PrimaryGeneratedColumn() id: number;
+
+  @IsNotEmpty({ groups: [CREATE] })
+  @ManyToOne(() => Order, (order) => order.payments)
+  order: Order;
+
+  @IsNotEmpty({ groups: [CREATE] })
+  @IsString({ always: true })
+  @Column({ type: 'varchar', length: 50, nullable: false })
+  payment_method: string;
+
+  @IsNotEmpty({ groups: [CREATE] })
+  @IsNumber({}, { always: true })
+  @IsPositive({ always: true })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: false })
+  amount: number;
+
+  @IsNotEmpty({ groups: [CREATE] })
+  @IsEnum(PaymentStatus, { always: true })
+  @Column({ type: 'varchar', length: 20, nullable: false })
+  status: PaymentStatus;
+
+  @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  created_at: Date;
+
+  @UpdateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+    onUpdate: 'CURRENT_TIMESTAMP',
+  })
+  updated_at: Date;
+}
+
+import { CrudValidationGroups } from '@dataui/crud';
+import {
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsPositive,
+  IsString,
+  MaxLength,
+} from 'class-validator';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+import { CartItem } from '../cart-items/cart-item.entity';
+import { Category } from '../categories/category.entity';
+import { OrderItem } from '../order-items/orderItem.entity';
+import { Review } from '../reviews/review.entity';
+import { WishlistItem } from '../wishlist-items/wishlistItem.entity';
+
+const { CREATE, UPDATE } = CrudValidationGroups;
+
+@Entity()
+export class Product {
+  @PrimaryGeneratedColumn() id: number;
+
+  @IsNotEmpty({ groups: [CREATE] })
+  @IsString({ always: true })
+  @MaxLength(100, { always: true })
+  @Column({ type: 'varchar', length: 100, nullable: false })
+  name: string;
+
+  @IsOptional({ groups: [UPDATE] })
+  @IsString({ always: true })
+  @MaxLength(255, { always: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  description: string;
+
+  @IsNotEmpty({ groups: [CREATE] })
+  @IsNumber({}, { always: true })
+  @IsPositive({ always: true })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: false })
+  price: number;
+
+  @IsNotEmpty({ groups: [CREATE] })
+  @IsNumber({}, { always: true })
+  @IsPositive({ always: true })
+  @Column({ type: 'int', nullable: false })
+  stock_quantity: number;
+
+  @IsOptional({ groups: [UPDATE] })
+  @IsNumber({}, { always: true })
+  @ManyToOne(() => Category, (category) => category.products)
+  category: Category;
+
+  @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  created_at: Date;
+
+  @UpdateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+    onUpdate: 'CURRENT_TIMESTAMP',
+  })
+  updated_at: Date;
+
+  /**
+   * Relations
+   */
+  @OneToMany(() => OrderItem, (e) => e.product)
+  order_items: OrderItem[];
+
+  @OneToMany(() => CartItem, (e) => e.product)
+  cart_items: CartItem[];
+
+  @OneToMany(() => Review, (e) => e.product)
+  reviews: Review[];
+
+  @OneToMany(() => WishlistItem, (e) => e.product)
+  wishlist_items: WishlistItem[];
+}
+
+import { CrudValidationGroups } from '@dataui/crud';
+import {
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Max,
+  MaxLength,
+  Min,
+} from 'class-validator';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+import { Product } from '../products/product.entity';
+import { User } from '../users/user.entity';
+
+const { CREATE, UPDATE } = CrudValidationGroups;
+
+@Entity()
+export class Review {
+  @PrimaryGeneratedColumn() id: number;
+
+  @IsNotEmpty({ groups: [CREATE] })
+  @ManyToOne(() => Product, (product) => product.reviews)
+  product: Product;
+
+  @IsNotEmpty({ groups: [CREATE] })
+  @ManyToOne(() => User, (user) => user.reviews)
+  user: User;
+
+  @IsNotEmpty({ groups: [CREATE] })
+  @IsNumber({}, { always: true })
+  @Min(1, { always: true })
+  @Max(5, { always: true })
+  @Column({ type: 'int', nullable: false })
+  rating: number;
+
+  @IsOptional({ groups: [CREATE, UPDATE] })
+  @IsString({ always: true })
+  @MaxLength(500, { always: true })
+  @Column({ type: 'varchar', length: 500, nullable: true })
+  comment: string;
+
+  @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  created_at: Date;
+
+  @UpdateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+    onUpdate: 'CURRENT_TIMESTAMP',
+  })
+  updated_at: Date;
+}
+
+import { CrudValidationGroups } from '@dataui/crud';
+import { IsNotEmpty, IsNumber } from 'class-validator';
+import {
+  CreateDateColumn,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+import { CartItem } from '../cart-items/cart-item.entity';
+import { User } from '../users/user.entity';
+
+const { CREATE, UPDATE } = CrudValidationGroups;
+
+@Entity()
+export class ShoppingCart {
+  @PrimaryGeneratedColumn() id: number;
+
+  @IsNotEmpty({ groups: [CREATE] })
+  @IsNumber({}, { always: true })
+  @ManyToOne(() => User, (user) => user.shopping_carts)
+  user: User;
+
+  @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  created_at: Date;
+
+  @UpdateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+    onUpdate: 'CURRENT_TIMESTAMP',
+  })
+  updated_at: Date;
+
+  @OneToMany(() => CartItem, (item) => item.cart)
+  items: CartItem[];
+}
+
+import { CrudValidationGroups } from '@dataui/crud';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  MaxLength,
+} from 'class-validator';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+import { Order } from '../orders/order.entity';
+import { Review } from '../reviews/review.entity';
+import { ShoppingCart } from '../shopping-carts/shopping-cart.entity';
+import { Wishlist } from '../wishlists/wishlist.entity';
+
+const { CREATE, UPDATE } = CrudValidationGroups;
+
+@Entity()
+export class User {
+  @PrimaryGeneratedColumn() id: number;
+
+  @IsOptional({ groups: [UPDATE] })
+  @IsNotEmpty({ groups: [CREATE] })
+  @IsString({ always: true })
+  @MaxLength(50, { always: true })
+  @Column({ type: 'varchar', length: 50, unique: true, nullable: false })
+  username: string;
+
+  @IsOptional({ groups: [UPDATE] })
+  @IsNotEmpty({ groups: [CREATE] })
+  @IsEmail({}, { groups: [CREATE, UPDATE] })
+  @Column({ type: 'varchar', length: 255, unique: true, nullable: false })
+  email: string;
+
+  @IsOptional({ groups: [UPDATE] })
+  @IsNotEmpty({ groups: [CREATE] })
+  @IsString({ always: true })
+  @MaxLength(255, { always: true })
+  @Column({ type: 'varchar', length: 255, nullable: false })
+  password: string;
+
+  @IsOptional({ groups: [UPDATE] })
+  @IsString({ always: true })
+  @MaxLength(100, { always: true })
+  @Column({ type: 'varchar', length: 100, nullable: true })
+  first_name: string;
+
+  @IsOptional({ groups: [UPDATE] })
+  @IsString({ always: true })
+  @MaxLength(100, { always: true })
+  @Column({ type: 'varchar', length: 100, nullable: true })
+  last_name: string;
+
+  @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  created_at: Date;
+
+  @UpdateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+    onUpdate: 'CURRENT_TIMESTAMP',
+  })
+  updated_at: Date;
+
+  @OneToMany(() => Order, (e) => e.user, {
+    cascade: true,
+    eager: true,
+  })
+  orders: Order[];
+
+  @OneToMany(() => ShoppingCart, (e) => e.user, {
+    cascade: true,
+    eager: true,
+  })
+  shopping_carts: ShoppingCart[];
+
+  @OneToMany(() => Review, (e) => e.user, {
+    cascade: true,
+    eager: true,
+  })
+  reviews: Review[];
+
+  @OneToMany(() => Wishlist, (e) => e.user, {
+    cascade: true,
+    eager: true,
+  })
+  wishlists: Wishlist[];
+}
+
+import { CrudValidationGroups } from '@dataui/crud';
+import { IsNotEmpty } from 'class-validator';
+import {
+  CreateDateColumn,
+  Entity,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { Product } from '../products/product.entity';
+import { Wishlist } from '../wishlists/wishlist.entity';
+
+const { CREATE, UPDATE } = CrudValidationGroups;
+
+@Entity()
+export class WishlistItem {
+  @PrimaryGeneratedColumn() id: number;
+
+  @IsNotEmpty({ groups: [CREATE] })
+  @ManyToOne(() => Wishlist, (wishlist) => wishlist.items)
+  wishlist: Wishlist;
+
+  @IsNotEmpty({ groups: [CREATE] })
+  @ManyToOne(() => Product, (product) => product.wishlist_items)
+  product: Product;
+
+  @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  created_at: Date;
+}
+
+import { CrudValidationGroups } from '@dataui/crud';
+import { IsNotEmpty } from 'class-validator';
+import {
+  CreateDateColumn,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+import { User } from '../users/user.entity';
+import { WishlistItem } from '../wishlist-items/wishlistItem.entity';
+
+const { CREATE, UPDATE } = CrudValidationGroups;
+
+@Entity()
+export class Wishlist {
+  @PrimaryGeneratedColumn() id: number;
+
+  @IsNotEmpty({ groups: [CREATE] })
+  @ManyToOne(() => User, (user) => user.wishlists)
+  user: User;
+
+  @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  created_at: Date;
+
+  @UpdateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+    onUpdate: 'CURRENT_TIMESTAMP',
+  })
+  updated_at: Date;
+
+  @OneToMany(() => WishlistItem, (item) => item.wishlist)
+  items: WishlistItem[];
+}
